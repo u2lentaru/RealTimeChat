@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// ApplyHandlers func
 func (serv *Server) ApplyHandlers() {
 	serv.router.Handle("/*", http.FileServer(http.Dir("./web")))
 	serv.router.Get("/socket", serv.socketHandler)
