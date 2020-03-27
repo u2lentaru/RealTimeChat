@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Real Time Chat</title>
+</head>
+<body>
+
+<div id="dialog"></div>
+<div id="controls">
+    <input type="text" id="message">
+    <button id="send">SEND</button>
+</div>
+
+<script>
+
+    let comps = {
+        dialog: document.querySelector('#dialog'),
+        message: document.querySelector('#controls #message'),
+        send: document.querySelector('#controls #send'),
+    };
+
+    let ws = new WebSocket('ws://localhost:8080/socket');
+    ws.onclose = () => console.log('closed');
+
+    comps.send.onclick = () => {
+        let msg = {
+            type: 'message',
+            data: comps.message.value,
+        };
+        ws.send(JSON.stringify(msg));
+        comps.message.value = '';
+    };
+
+    ws.onmessage = e => {
+        let msg = JSON.parse(e.data);
+        if (msg.type === 'ping') {
+            ws.send(JSON.stringify({type: 'pong'}));
+            return;
+        }
+
+        if (msg.type === 'message') {
+            let msgComponent = document.createElement('DIV');
+            msgComponent.innerText = msg.data;
+            comps.dialog.appendChild(msgComponent);
+        }
+    };
+
+    ws.onopen = () => {
+        console.log('connected');
+    };
+
+</script>
+
+</body>
+</html>
