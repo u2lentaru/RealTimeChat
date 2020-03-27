@@ -1,14 +1,17 @@
 package server
 
 import (
-	"github.com/go-chi/chi"
-	"github.com/gorilla/websocket"
 	"net/http"
 	"sync"
+
+	"github.com/go-chi/chi"
+	"github.com/gorilla/websocket"
 )
 
+// Subscriber type
 type Subscriber func(msg string) error
 
+// Server type
 type Server struct {
 	router   *chi.Mux
 	upgrader *websocket.Upgrader
@@ -17,6 +20,7 @@ type Server struct {
 	subscribers map[string]Subscriber
 }
 
+// New func
 func New() *Server {
 	router := chi.NewRouter()
 
@@ -38,6 +42,7 @@ func New() *Server {
 	return serv
 }
 
+// Start func
 func (serv *Server) Start() error {
 	return http.ListenAndServe(":8085", serv.router)
 }

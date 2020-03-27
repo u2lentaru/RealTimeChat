@@ -2,13 +2,15 @@ package server
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 )
 
+// ApplyHandlers func
 func (serv *Server) ApplyHandlers() {
 	serv.router.Handle("/*", http.FileServer(http.Dir("./web")))
 	serv.router.Get("/socket", serv.socketHandler)
@@ -50,7 +52,7 @@ func (serv *Server) socketHandler(w http.ResponseWriter, r *http.Request) {
 		msg := Message{}
 		if err := ws.ReadJSON(&msg); err != nil {
 			if !websocket.IsCloseError(err, 1001) {
-				log.Fatalf("ws msg read err: %v", err)
+				log.Printf("ws msg read err: %v", err)
 			}
 			break
 		}
@@ -64,14 +66,14 @@ func (serv *Server) socketHandler(w http.ResponseWriter, r *http.Request) {
 			serv.submutex.Lock()
 			for _, sub := range serv.subscribers {
 				if err := sub(msg.Data); err != nil {
-					log.Fatalf("ws msg subs err: %v", err)
+					log.Printf("ws msg subs err: %v", err)
 				}
 			}
 			serv.submutex.Unlock()
 		}
 	}
 
-	fmt.Println("CLSOED")
+	fmt.Println("CLOSED")
 	defer func() {
 		serv.submutex.Lock()
 		delete(serv.subscribers, id)
